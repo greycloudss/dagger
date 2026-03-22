@@ -5,6 +5,9 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <vector>
+#include <array>
+#include <cstdio>
+#include <string>
 
 namespace FEAT {
     // typedef enum {
@@ -14,9 +17,10 @@ namespace FEAT {
     // } A_TYPE;
 
     class Loopback {
-        bool aType;
+        bool cType; // 0 is wlan, 1 is eth
         private:
             std::vector<std::string> captured;
+            std::string conType;
         public:
             Loopback();
             bool writeLP();
