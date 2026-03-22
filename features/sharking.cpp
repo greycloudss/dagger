@@ -14,7 +14,6 @@ namespace FEAT {
     }
 
     
-
     Loopback::Loopback() {
         std::string type = findConnectionType();
 
@@ -26,6 +25,7 @@ namespace FEAT {
         this->cType = type.c_str()[0] == 'w' ? 0 : 1;
     }
 
+    
     bool Loopback::writeLP() {
 
         return {};
