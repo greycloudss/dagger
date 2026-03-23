@@ -1,13 +1,13 @@
 #pragma once
 #include <iostream>
 #include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
+#include <netpacket/packet.h>
+#include <net/ethernet.h>
+#include <array>
 #include <unistd.h>
 #include <vector>
-#include <array>
-#include <cstdio>
-#include <string>
+
+#include <pcap.h>
 
 namespace FEAT {
     // typedef enum {
@@ -17,12 +17,21 @@ namespace FEAT {
     // } A_TYPE;
 
     class Loopback {
-        bool cType; // 0 is wlan, 1 is eth
         private:
-            std::vector<std::string> captured;
+            bool cType; // 0 is wlan, 1 is eth
+            char errbuf[PCAP_ERRBUF_SIZE];
             std::string conType;
+            pcap_t* cap;
+
+            pcap_if_t* allDevs;
+            pcap_if_t* dev;
+            const u_char* packet;
+
+            void findDev();
+            void captureDead();
+            void captureLive();
         public:
             Loopback();
-            bool writeLP();
+            void capture(bool Live);
     };
 };
