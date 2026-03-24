@@ -6,7 +6,7 @@
 #include <array>
 #include <unistd.h>
 #include <vector>
-
+#include <pthread.h>
 #include <pcap.h>
 
 namespace FEAT {
@@ -16,8 +16,15 @@ namespace FEAT {
     //     //BOTH
     // } A_TYPE;
 
+    typedef struct {
+        pcap_pkthdr* hdr;
+        const u_char* data;
+    } dag_packet;
+
     class Loopback {
         private:
+            volatile bool killswitch;
+
             bool cType; // 0 is wlan, 1 is eth
             char errbuf[PCAP_ERRBUF_SIZE];
             std::string conType;
@@ -27,11 +34,16 @@ namespace FEAT {
             pcap_if_t* dev;
             const u_char* packet;
 
-            void findDev();
-            void captureDead();
+            bool findDev();
             void captureLive();
+            void looperTrooper();
         public:
             Loopback();
             void capture(bool Live);
+
+            void kill();
+            void revive();
+            void displayPacket(pcap_pkthdr* hdr, const u_char* data);
+            
     };
 };

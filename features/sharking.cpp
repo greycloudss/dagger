@@ -40,20 +40,33 @@ namespace FEAT {
         
         this->cType = type.c_str()[0] == 'w' ? 0 : 1;
         
-        findDev()
+        findDev();
+        
+        captureLive();
     }
 
-    
-    void Loopback::captureDead() {
-        cap = pcap_open_dead(dev->name, 65535);
+    void Loopback::looperTrooper() {
+        dag_packet pkt = {};
+        while (!this->killswitch) {
+            pcap_next_ex(cap, pkt->hdr, pkt->data);
+        }
     }
 
     void Loopback::captureLive() {
         cap = pcap_open_live(dev->name, 65535, 1, 1000, errbuf);
+        
     }
 
-    void Loopback::capture(bool live) {
-        if (live) captureLive();
-        else captureDead();
+    void* Loopback::displayPacket() {
+        
+    }
+
+    void Loopback::kill() {
+        this->killswitch = false;
+    }
+
+    void Loopback::revive() {
+        this->killswitch = true;
     }
 }
+
