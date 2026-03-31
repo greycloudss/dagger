@@ -56,7 +56,7 @@ namespace FEAT {
         
     }
 
-    void Loopback::displayPacket(pcap_pkthdr* hdr, const u_char* data) {
+    void* Loopback::displayPacket(pcap_pkthdr* hdr, const u_char* data) {
         
     }
 

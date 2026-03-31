@@ -43,7 +43,7 @@ namespace FEAT {
 
             void kill();
             void revive();
-            void displayPacket(pcap_pkthdr* hdr, const u_char* data);
+            void* displayPacket(pcap_pkthdr* hdr, const u_char* data);
             
     };
 };
