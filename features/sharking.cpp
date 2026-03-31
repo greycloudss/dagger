@@ -28,7 +28,6 @@ namespace FEAT {
             throw std::runtime_error("[Error] sort your connection out.");
             return;
         }
-
         cType = 1; // presume always eth
         errbuf[PCAP_ERRBUF_SIZE] = {};
         conType = nullptr;
@@ -39,10 +38,10 @@ namespace FEAT {
         packet = nullptr;
         
         this->cType = type.c_str()[0] == 'w' ? 0 : 1;
+
+        printf("[INFO] adapter name: %s\n", type);
         
         findDev();
-        
-        captureLive();
     }
 
     void Loopback::looperTrooper() {
@@ -57,7 +56,7 @@ namespace FEAT {
         
     }
 
-    void* Loopback::displayPacket() {
+    void Loopback::displayPacket(pcap_pkthdr* hdr, const u_char* data) {
         
     }
 
