@@ -18,6 +18,8 @@ namespace MAIN {
         while (true) {
             sel = read_char();
 
+
+            //temporary cases
             switch (sel) {
                 case '1':
                     lpb->revive();
