@@ -1,31 +1,39 @@
 #pragma once
 #include "features/sharking.h"
 
+
 namespace MAIN {
+    int read_char() {
+        int c = getchar();
+        int d;
+
+        while ((d = getchar()) != '\n' && d != EOF) {}
+
+        return c;
+    }
+
     void interface(FEAT::Loopback* lpb) {
         unsigned char sel = 0;
-        jmper: 
+
         while (true) {
-            sel = getchar();
+            sel = read_char();
+
             switch (sel) {
-                case 1: // capture timed
-                    continue;
-                
-                case 2: // capture indef
-                    continue;
-                
-                default: //exit
+                case '1':
+                    lpb->revive();
+                    lpb->capture(true);
+                    break;
+
+                case '2':
+                    lpb->revive();
+                    lpb->capture(true);
+                    break;
+
+                default:
                     printf("[KILL] hit default, meaning kill\n");
                     lpb->kill();
-                    break;
+                    return;
+                }
             }
-        }
-        printf("[INFO] Do you wish to exit? Y/n: ");
-        sel = getchar();
-        if (sel == 0x6E || sel == 0x4E) return;
-        else {
-            lpb->revive();
-            goto jmper;
-        }
     }
-};
+}
