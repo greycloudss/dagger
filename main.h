@@ -12,13 +12,14 @@ namespace MAIN {
         return c;
     }
 
-    void interface(FEAT::Loopback* lpb) {
+    void interface(FEAT::Adapter* lpb) {
         unsigned char sel = 0;
+
+        printf("Selection:\n1 - listen to lo adapter\n2 - listen to connection adapter\n\n> :");
 
         while (true) {
             sel = read_char();
-
-
+            printf("\n");
             //temporary cases
             switch (sel) {
                 case '1':

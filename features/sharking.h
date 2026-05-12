@@ -8,6 +8,7 @@
 #include <vector>
 #include <pthread.h>
 #include <pcap.h>
+#include "packet.h"
 
 namespace FEAT {
     // typedef enum {
@@ -21,7 +22,7 @@ namespace FEAT {
         const u_char* data;
     } dag_packet;
 
-    class Loopback {
+    class Adapter {
         private:
             volatile bool killswitch;
 
@@ -33,17 +34,20 @@ namespace FEAT {
             pcap_if_t* allDevs;
             pcap_if_t* dev;
             const u_char* packet;
+            std::vector<Packet*> packets;
 
             bool findDev();
             void captureLive();
             void looperTrooper();
         public:
-            Loopback();
+            Adapter();
             void capture(bool Live);
 
             void kill();
             void revive();
             void* displayPacket(pcap_pkthdr* hdr, const u_char* data);
+
+            ~Adapter() = default;
             
     };
 };

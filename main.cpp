@@ -5,7 +5,7 @@
 
 
 int main(int argc, const char* argv[]) {
-    FEAT::Loopback* dagger = new FEAT::Loopback();
+    FEAT::Adapter* dagger = new FEAT::Adapter();
 
     MAIN::interface(dagger);
 

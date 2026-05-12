@@ -14,7 +14,7 @@ namespace FEAT {
         return out;
     }
 
-    bool Loopback::findDev() {
+    bool Adapter::findDev() {
         if (pcap_findalldevs(&allDevs, errbuf) == -1) return false;
         
         for (dev = allDevs; dev; dev = dev->next)
@@ -23,11 +23,11 @@ namespace FEAT {
         return false;
     }
 
-    Loopback::Loopback() {
+    Adapter::Adapter() {
         std::string type = findConnectionType();
 
         if (type.empty()) {
-            throw std::runtime_error("[Error] sort your connection out.");
+            throw std::runtime_error("[\033[31mERROR\033[0m] sort your connection out.");
         }
 
         cType = 1;
@@ -42,12 +42,12 @@ namespace FEAT {
 
         this->cType = type.c_str()[0] == 'w' ? 0 : 1;
 
-        printf("[INFO] adapter name: %s\n", type.c_str());
+        printf("[\033[34mINFO\033[0m] adapter name: %s\n", type.c_str());
 
         findDev();
     }
 
-    void FEAT::Loopback::looperTrooper() {
+    void FEAT::Adapter::looperTrooper() {
         dag_packet pkt = {};
 
         while (killswitch) {
@@ -60,41 +60,43 @@ namespace FEAT {
         }
     }
 
-    void FEAT::Loopback::captureLive() {
+    void FEAT::Adapter::captureLive() {
         cap = pcap_open_live(dev->name, 65535, 1, 1000, errbuf);
 
         if (!cap) {
-            printf("[ERROR] %s\n", errbuf);
+            printf("[\033[31mERROR\033[0m] %s\n", errbuf);
             exit(1);
         }
 
-        printf("[INFO] listening on %s\n", dev->name);
+        printf("[\033[34mINFO\033[0m] listening on %s\n", dev->name);
     }
 
-    void* FEAT::Loopback::displayPacket(pcap_pkthdr* hdr, const u_char* data) {
-        printf("packet size: %d\n", hdr->len);
+    void* FEAT::Adapter::displayPacket(pcap_pkthdr* hdr, const u_char* data) {
+        printf("[\033[32mPACKET\033[0m] packet size: %d\n", hdr->len);
 
-        for (u_int i = 0; i < hdr->len && i < 64; i++) {
-            printf("%02X ", data[i]);
-        }
+        packets.push_back(new Packet(data, hdr->len));
+        printf("%s\n", packets.back()->getText().c_str());
+        
+        for (u_int i = 0; i < hdr->len && i < 64; i++) printf("%02X ", data[i]);
+        
 
         printf("\n\n");
 
         return nullptr;
     }
 
-    void FEAT::Loopback::capture(bool Live) {
+    void FEAT::Adapter::capture(bool Live) {
         if (Live) {
             captureLive();
             looperTrooper();
         }
     }
 
-    void Loopback::kill() {
+    void Adapter::kill() {
         this->killswitch = false;
     }
 
-    void Loopback::revive() {
+    void Adapter::revive() {
         this->killswitch = true;
     }
 }
