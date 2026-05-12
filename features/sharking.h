@@ -11,12 +11,6 @@
 #include "packet.h"
 
 namespace FEAT {
-    // typedef enum {
-    //     ETH,
-    //     WIFI
-    //     //BOTH
-    // } A_TYPE;
-
     typedef struct {
         pcap_pkthdr* hdr;
         const u_char* data;
@@ -26,7 +20,7 @@ namespace FEAT {
         private:
             volatile bool killswitch;
 
-            bool cType; // 0 is wlan, 1 is eth
+            bool cType;
             char errbuf[PCAP_ERRBUF_SIZE];
             std::string conType;
             pcap_t* cap;
@@ -36,18 +30,21 @@ namespace FEAT {
             const u_char* packet;
             std::vector<Packet*> packets;
 
-            bool findDev();
+            bool findLoopbackDev();
+            bool findConnectionDev();
             void captureLive();
             void looperTrooper();
         public:
             Adapter();
+
+            bool selectLoopbackDev();
+            bool selectConnectionDev();
             void capture(bool Live);
 
             void kill();
             void revive();
             void* displayPacket(pcap_pkthdr* hdr, const u_char* data);
 
-            ~Adapter() = default;
-            
+            ~Adapter();
     };
 };

@@ -4,7 +4,7 @@
 
 
 
-int main(int argc, const char* argv[]) {
+int main() {
     FEAT::Adapter* dagger = new FEAT::Adapter();
 
     MAIN::interface(dagger);

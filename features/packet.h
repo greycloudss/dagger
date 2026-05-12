@@ -61,6 +61,30 @@ namespace FEAT {
         return out.str();
     }
 
+    static std::string guessOSFromTTL(unsigned ttl) {
+        if (ttl >= 128 && ttl <= 255) {
+            if (ttl == 255) return "Cisco Device";
+            if (ttl >= 128 && ttl < 256) return "Windows OS (likely Windows Server or Desktop)";
+        } else if (ttl >= 64 && ttl < 128) {
+            if (ttl == 64) return "Linux/FreeBSD/macOS/Unix-like";
+            if (ttl == 100) return "IBM OS/2";
+            if (ttl == 127 || ttl == 190) return "macOS";
+        } else if (ttl >= 30 && ttl < 64) {
+            if (ttl == 50) return "Windows 95/98/ME";
+            if (ttl == 60) return "AIX";
+            if (ttl == 48) return "BSDI";
+            if (ttl == 30) return "SunOS";
+        } else if (ttl >= 200 && ttl < 256) {
+            if (ttl == 240) return "Novell";
+            if (ttl == 254) return "Solaris/AIX";
+            if (ttl == 200) return "HP-UX";
+        }
+
+        if (ttl >= 50 && ttl <= 64) return "Likely Unix/Linux or macOS variant";
+        if (ttl >= 120 && ttl <= 130) return "Likely Windows variant";
+        return "Unknown OS or device";
+    }
+
     static std::string formatIPv4(const IPv4Header& h) {
         std::ostringstream out;
         out
@@ -72,6 +96,7 @@ namespace FEAT {
             << "Flags: " << h.flags << '\n'
             << "Fragment Offset: " << h.fragmentOffset << '\n'
             << "TTL: " << h.ttl << '\n'
+            << "Likely Operating System: " << guessOSFromTTL(h.ttl) << '\n'
             << "Protocol: " << h.protocol << '\n'
             << "Header Checksum: " << h.checksum << '\n'
             << "Source: " << ipToString(h.source) << '\n'

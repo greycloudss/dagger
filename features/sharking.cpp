@@ -3,7 +3,7 @@
 #define MAX_PACKETS 10000
 
 namespace FEAT {
-    std::string findConnectionType() { // is redundant
+    std::string findConnectionType() {
         std::array<char, 128> buf;
         std::string out;
 
@@ -11,40 +11,70 @@ namespace FEAT {
         if (!f) return {};
 
         while (fgets(buf.data(), buf.size(), f)) out += buf.data();
+        pclose(f);
+
+        while (!out.empty() && (out.back() == '\n' || out.back() == '\r' || out.back() == ' ' || out.back() == '\t')) out.pop_back();
         return out;
     }
 
-    bool Adapter::findDev() {
+    bool Adapter::findLoopbackDev() {
+        if (allDevs) {
+            pcap_freealldevs(allDevs);
+            allDevs = nullptr;
+        }
+
         if (pcap_findalldevs(&allDevs, errbuf) == -1) return false;
-        
+
         for (dev = allDevs; dev; dev = dev->next)
             if ((dev->flags & PCAP_IF_LOOPBACK) != 0) return true;
 
+        dev = nullptr;
+        return false;
+    }
+
+    bool Adapter::findConnectionDev() {
+        if (allDevs) {
+            pcap_freealldevs(allDevs);
+            allDevs = nullptr;
+        }
+
+        if (pcap_findalldevs(&allDevs, errbuf) == -1) return false;
+
+        for (dev = allDevs; dev; dev = dev->next)
+            if (dev->name && conType == dev->name) return true;
+
+        dev = nullptr;
         return false;
     }
 
     Adapter::Adapter() {
         std::string type = findConnectionType();
 
-        if (type.empty()) {
-            throw std::runtime_error("[\033[31mERROR\033[0m] sort your connection out.");
-        }
-
         cType = 1;
         errbuf[0] = '\0';
         conType = type;
         cap = nullptr;
-
         allDevs = nullptr;
         dev = nullptr;
         packet = nullptr;
         killswitch = true;
 
-        this->cType = type.c_str()[0] == 'w' ? 0 : 1;
+        if (!type.empty()) this->cType = type.c_str()[0] == 'w' ? 0 : 1;
 
-        printf("[\033[34mINFO\033[0m] adapter name: %s\n", type.c_str());
+        if (!type.empty()) printf("[\033[34mINFO\033[0m] default route adapter: %s\n", type.c_str());
+    }
 
-        findDev();
+    bool Adapter::selectLoopbackDev() {
+        if (!findLoopbackDev()) return false;
+        printf("[\033[34mINFO\033[0m] selected loopback adapter: %s\n", dev ? dev->name : "(null)");
+        return dev != nullptr;
+    }
+
+    bool Adapter::selectConnectionDev() {
+        if (conType.empty()) return false;
+        if (!findConnectionDev()) return false;
+        printf("[\033[34mINFO\033[0m] selected connection adapter: %s\n", dev ? dev->name : "(null)");
+        return dev != nullptr;
     }
 
     void FEAT::Adapter::looperTrooper() {
@@ -61,6 +91,11 @@ namespace FEAT {
     }
 
     void FEAT::Adapter::captureLive() {
+        if (!dev) {
+            printf("[\033[31mERROR\033[0m] no adapter selected\n");
+            exit(1);
+        }
+
         cap = pcap_open_live(dev->name, 65535, 1, 1000, errbuf);
 
         if (!cap) {
@@ -76,9 +111,8 @@ namespace FEAT {
 
         packets.push_back(new Packet(data, hdr->len));
         printf("%s\n", packets.back()->getText().c_str());
-        
+
         for (u_int i = 0; i < hdr->len && i < 64; i++) printf("%02X ", data[i]);
-        
 
         printf("\n\n");
 
@@ -98,5 +132,13 @@ namespace FEAT {
 
     void Adapter::revive() {
         this->killswitch = true;
+    }
+
+    Adapter::~Adapter() {
+        for (auto p : packets) delete p;
+        packets.clear();
+
+        if (cap) pcap_close(cap);
+        if (allDevs) pcap_freealldevs(allDevs);
     }
 }

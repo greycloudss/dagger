@@ -1,7 +1,6 @@
 #pragma once
 #include "features/sharking.h"
 
-
 namespace MAIN {
     int read_char() {
         int c = getchar();
@@ -20,14 +19,21 @@ namespace MAIN {
         while (true) {
             sel = read_char();
             printf("\n");
-            //temporary cases
             switch (sel) {
                 case '1':
+                    if (!lpb->selectLoopbackDev()) {
+                        printf("[\033[31mERROR\033[0m] failed to select loopback adapter\n");
+                        break;
+                    }
                     lpb->revive();
                     lpb->capture(true);
                     break;
 
                 case '2':
+                    if (!lpb->selectConnectionDev()) {
+                        printf("[\033[31mERROR\033[0m] failed to select connection adapter\n");
+                        break;
+                    }
                     lpb->revive();
                     lpb->capture(true);
                     break;
@@ -36,7 +42,7 @@ namespace MAIN {
                     printf("[KILL] hit default, meaning kill\n");
                     lpb->kill();
                     return;
-                }
             }
+        }
     }
 }
