@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <stdexcept>
+#include "protocols.h"
 
 namespace FEAT {
     struct EthernetHeader {
@@ -26,6 +27,7 @@ namespace FEAT {
         uint32_t source;
         uint32_t destination;
     };
+
     static std::string byteToHex(unsigned char b) {
         static const char* digits = "0123456789ABCDEF";
         std::string s;
@@ -98,6 +100,7 @@ namespace FEAT {
             << "TTL: " << h.ttl << '\n'
             << "Likely Operating System: " << guessOSFromTTL(h.ttl) << '\n'
             << "Protocol: " << h.protocol << '\n'
+            << "Protocol Name: " << protocolToString(h.protocol) << '\n'
             << "Header Checksum: " << h.checksum << '\n'
             << "Source: " << ipToString(h.source) << '\n'
             << "Destination: " << ipToString(h.destination);
